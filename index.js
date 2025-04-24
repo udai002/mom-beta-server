@@ -3,6 +3,7 @@ const cors = require("cors")
 const connectDb = require("./config/db")
 const session = require("express-session")
 require("dotenv").config() 
+const routes = require("./routes/order.routes")
 const port = process.env.PORT || 3001
 
 connectDb()
@@ -22,10 +23,11 @@ app.use(session({
   }));
 
 
-
+  app.use("/api" , routes)
 app.use("/" , (req , res)=>{
     res.send("welcome to mom pharmacy app ")
 })
+
 
 app.listen(port , ()=>{
     console.log(`app is listening at http://localhost:${port}`)
