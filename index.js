@@ -30,6 +30,8 @@ app.use(session({
 app.use("/api/user" , require("./routes/user.routes"))
 app.use("/address", addressRoutes )
 app.use("/delivery", deliveryBoyRoutes)
+app.use("/api/donar", require("./routes/donar.routes"))
+app.use("/api/report", require("./routes/report.routes"))
 
 app.use("/" , (req , res)=>{
     res.send("welcome to mom pharmacy app ")
