@@ -33,6 +33,11 @@ app.use("/delivery", deliveryBoyRoutes)
 app.use("/api/donar", require("./routes/donar.routes"))
 app.use("/api/report", require("./routes/report.routes"))
 
+app.use('/api/prescriptions' , require("./routes/prescriptionRoutes"))
+app.use('/api/suggestions', require("./routes/suggestionRoutes"))
+app.use('/api/medicines' , medicineRoutes)
+app.use('/api/medicine', medicineRoutes);
+
 app.use("/" , (req , res)=>{
     res.send("welcome to mom pharmacy app ")
 })
