@@ -21,7 +21,7 @@ app.use(session({
     }
   }));
 
-
+app.use("/api/user" , require("./routes/user.routes"))
 
 app.use("/" , (req , res)=>{
     res.send("welcome to mom pharmacy app ")
