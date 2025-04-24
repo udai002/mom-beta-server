@@ -1,4 +1,4 @@
-const Report = require('../models/report.model'); 
+const Report = require('../models/report.models'); 
 const jwt = require("jsonwebtoken");
 
 const getuserId = async (req, res) => {

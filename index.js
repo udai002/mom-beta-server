@@ -6,6 +6,7 @@ const addressRoutes = require('./routes/addressRoutes')
 const deliveryBoyRoutes = require('./routes/deliveryBoyRoutes')
 require("dotenv").config() 
 const orderRoutes = require("./routes/order.routes")
+const medicineRoutes = require("./routes/medicineRoutes")
 
 const port = process.env.PORT || 3001
 
