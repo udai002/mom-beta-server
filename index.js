@@ -2,8 +2,11 @@ const express = require("express")
 const cors = require("cors")
 const connectDb = require("./config/db")
 const session = require("express-session")
+const addressRoutes = require('./routes/addressRoutes')
+const deliveryBoyRoutes = require('./routes/deliveryBoyRoutes')
 require("dotenv").config() 
-const routes = require("./routes/order.routes")
+const orderRoutes = require("./routes/order.routes")
+
 const port = process.env.PORT || 3001
 
 connectDb()
@@ -23,8 +26,10 @@ app.use(session({
   }));
 
 
-  app.use("/api" , routes)
+  app.use("/api" , orderRoutes)
 app.use("/api/user" , require("./routes/user.routes"))
+app.use("/address", addressRoutes )
+app.use("/delivery", deliveryBoyRoutes)
 
 app.use("/" , (req , res)=>{
     res.send("welcome to mom pharmacy app ")
