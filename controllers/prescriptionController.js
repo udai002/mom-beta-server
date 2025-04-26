@@ -41,3 +41,30 @@ exports.deletePrescription = async (req, res) => {
     }
 
 };
+
+exports.getPrescriptionById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const prescription = await Prescription.findById(id);
+
+        if (!prescription) {
+            return res.status(404).json({ message: 'Prescription not found' });
+        }
+
+        res.status(200).json(prescription);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching prescription', error: err.message });
+    }
+};
+
+exports.getAllPrescriptions = async (req, res) => {
+    try {
+        const { userId } = req.query;
+        const filter = userId ? { userId } : {};
+
+        const prescriptions = await Prescription.find(filter);
+        res.status(200).json(prescriptions);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching prescriptions', error: err.message });
+    }
+};
