@@ -22,13 +22,18 @@ const MedicineSchema = mongoose.Schema({
     },
     
     Expirydate: {
-        type: Number,
-        default: 0
+        type: String,
+        required: true,
     },
 
-    imageUrl:{
+    manufacturingDate: {
         type: String,
-        required: true
+        required: true,
+    },
+
+    batchNo: {
+        type: String,
+        required: true,
     },
     
 });

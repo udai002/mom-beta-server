@@ -40,10 +40,6 @@ app.use('/api/medicines' , medicineRoutes)
 app.use('/api/medicine', medicineRoutes);
 
 
-app.use("/" , (req , res)=>{
-    res.send("welcome to mom pharmacy app ")
-})
-
 
 app.listen(port , ()=>{
     console.log(`app is listening at http://localhost:${port}`)
