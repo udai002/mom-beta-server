@@ -7,7 +7,7 @@ const deliveryBoyRoutes = require('./routes/deliveryBoyRoutes')
 require("dotenv").config() 
 const orderRoutes = require("./routes/order.routes")
 const medicineRoutes = require("./routes/medicineRoutes")
-
+const AssessmentRoutes = require("./routes/AssessmentRoutes")
 const port = process.env.PORT || 3001
 
 connectDb()
@@ -38,7 +38,7 @@ app.use('/api/prescriptions' , require("./routes/prescriptionRoutes"))
 app.use('/api/suggestions', require("./routes/suggestionRoutes"))
 app.use('/api/medicines' , medicineRoutes)
 app.use('/api/medicine', medicineRoutes);
-
+app.use('/assessment', AssessmentRoutes);
 
 app.use("/" , (req , res)=>{
     res.send("welcome to mom pharmacy app ")
