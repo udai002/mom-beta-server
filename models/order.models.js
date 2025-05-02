@@ -6,6 +6,7 @@ const orderSchema= new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
     },
+    
     deliveryboy_id:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'DeliveryBoy'
@@ -23,6 +24,9 @@ const orderSchema= new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Prescription'
     },
+    medicines:[
+
+    ],
     ETA:{
       type:Number,
       default:10
