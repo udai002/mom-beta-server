@@ -2,14 +2,15 @@ const Address = require('../models/Addres');
 
 const createAddress = async(req, res)=> {
     try{
-        const {userid, state,city,street,pincode} = req.body
+        console.log("Received data:", req.body);
+        const {userid, state,city,street} = req.body
 
         const address = new Address({
             userid,
             state,
             city,
             street,
-            pincode
+            
         })
         await address.save()
         res.status(201).json(address)
