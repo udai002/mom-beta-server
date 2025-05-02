@@ -8,9 +8,12 @@ const medicineAdd = async (req, res) => {
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
         const { name, price, quantity, description, Expirydate, manufacturingDate, batchNo } = req.body;
 
-       
+        if (!name || !price || !quantity || !description || !expirydate || !imageUrl) {
+            return res.status(400).json({ message: "All fields including image are required" });
+        }
 
-        const newMedicine = new Medicine({ name, price, quantity, description, Expirydate, manufacturingDate, batchNo});
+
+        const newMedicine = new Medicine({ name, price, quantity, description, Expirydate, manufacturingDate, batchNo, imageUrl});
         await newMedicine.save();
 
         res.status(201).json({ message: "Medicine added successfully", data: newMedicine });
@@ -45,8 +48,8 @@ const getMedicineById = async (req, res) => {
 
 const updateMedicine = async (req, res) => {
     try {
-        const { name, price, quantity, description, expirydate, manufacturingDate, batchNo} = req.body;
-        const updateData = { name, price, quantity, description, expirydate, manufacturingDate, batchNo };
+        const { name, price, quantity, description, expirydate, manufacturingDate, batchNo, imageUrl} = req.body;
+        const updateData = { name, price, quantity, description, expirydate, manufacturingDate, batchNo, imageUrl };
 
         if (req.file) {
             updateData.imageUrl = `/uploads/${req.file.filename}`;

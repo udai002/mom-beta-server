@@ -3,10 +3,16 @@ const DeliveryBoy = require('../models/DeliveryBoy');
 
 exports.createDeliveryBoy = async (req, res) => {
   try {
+    const existing = await DeliveryBoy.findOne({ phoneNumber: req.body.phoneNumber });
+    if (existing) {
+      return res.status(400).json({ error: 'Phone number already exists' });
+    }
+
     const deliveryBoy = new DeliveryBoy(req.body);
     await deliveryBoy.save();
     res.status(201).json(deliveryBoy);
-  } catch (error) {
+  }
+  catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
