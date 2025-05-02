@@ -8,9 +8,9 @@ const medicineAdd = async (req, res) => {
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
         const { name, price, quantity, description, expirydate } = req.body;
 
-        if (!name || !price || !quantity || !description || !expirydate || !imageUrl) {
-            return res.status(400).json({ message: "All fields including image are required" });
-        }
+        // if (!name || !price || !quantity || !description || !expirydate || !imageUrl) {
+        //     return res.status(400).json({ message: "All fields including image are required" });
+        // }
 
         const newMedicine = new Medicine({ name, price, quantity, description, expirydate, imageUrl });
         await newMedicine.save();

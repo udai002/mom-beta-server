@@ -4,6 +4,11 @@ const connectDb = require("./config/db")
 const session = require("express-session")
 const addressRoutes = require('./routes/addressRoutes')
 const deliveryBoyRoutes = require('./routes/deliveryBoyRoutes')
+const medicineRoutes = require('./routes/medicineRoutes')
+const path = require('path');
+const kyc=require('./routes/kycRoutes')
+
+
 require("dotenv").config() 
 const orderRoutes = require("./routes/order.routes")
 const medicineRoutes = require("./routes/medicineRoutes")
@@ -25,7 +30,7 @@ app.use(session({
       httpOnly: true                     // 🔐 can't access cookie via JS
     }
   }));
-
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
   app.use("/api" , orderRoutes)
 app.use("/api/user" , require("./routes/user.routes"))
@@ -33,6 +38,7 @@ app.use("/address", addressRoutes )
 app.use("/delivery", deliveryBoyRoutes)
 app.use("/api/donar", require("./routes/donar.routes"))
 app.use("/api/report", require("./routes/report.routes"))
+app.use("/api",kyc)
 
 app.use('/api/prescriptions' , require("./routes/prescriptionRoutes"))
 app.use('/api/suggestions', require("./routes/suggestionRoutes"))
@@ -40,9 +46,7 @@ app.use('/api/medicines' , medicineRoutes)
 app.use('/api/medicine', medicineRoutes);
 app.use('/assessment', AssessmentRoutes);
 
-app.use("/" , (req , res)=>{
-    res.send("welcome to mom pharmacy app ")
-})
+
 
 
 app.listen(port , ()=>{

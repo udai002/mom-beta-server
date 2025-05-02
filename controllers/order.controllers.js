@@ -20,7 +20,7 @@ const getOrder = async (req, res) => {
         .populate('deliveryboy_id')
         .populate('address_id')
         .populate('prescription_id')
-        .lean();
+        
       
       res.status(200).json(orderDetails);
     } catch (e) {

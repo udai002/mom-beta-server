@@ -12,7 +12,7 @@ const orderSchema= new mongoose.Schema({
     },
     address_id:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Address'
+        ref:'Addres'
     },
     status: {
         type: String,
