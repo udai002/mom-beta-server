@@ -1,102 +1,169 @@
-const Order = require("../models/order.models");
-const Medicine = require("../models/medicine"); 
+const Order = require('../models/order.models');
+const DeliveryBoy = require('../models/DeliveryBoy');
+const Earning = require('../models/Earnings')
+const DeliveryAssessment = require('../models/DeliveryAssessment');
 
-const createOrder = async (req, res) => {
+exports.createOrder = async (req, res) => {
   try {
-    const {
+    const { user_id, address_id, ETA, medicines, total_amount } = req.body;
+
+    const newOrder = new Order({
       user_id,
-      deliveryboy_id,
       address_id,
-      prescription_id,
       ETA,
-      medicines, 
-    } = req.body;
+      medicines,
+      total_amount,
+      status: 'confirmed'
+    });
 
-    if (!medicines || medicines.length === 0) {
-      return res.status(400).json({ msg: "Order must contain at least one medicine" });
-    }
+    await newOrder.save();
 
-    let totalAmount = 0;
-    const enrichedMedicines = [];
+    const availableBoys = await DeliveryBoy.find({ isAvailable: 'yes' });
 
-    for (const med of medicines) {
-      const medicine = await Medicine.findById(med.medicine_id);
+    if (availableBoys.length > 0) {
+      const deliveryBoy = availableBoys[0];
+      newOrder.deliveryboy_id = deliveryBoy._id;
+      await newOrder.save();
 
-      if (!medicine) {
-        return res.status(404).json({ msg: `Medicine not found: ${med.medicine_id}` });
-      }
+      deliveryBoy.isAvailable = 'no';
+      await deliveryBoy.save();
 
-      const unitPrice = medicine.price;
-      const subtotal = unitPrice * med.quantity;
-      totalAmount += subtotal;
-
-      enrichedMedicines.push({
-        medicine_id: med.medicine_id,
-        quantity: med.quantity,
-        price: unitPrice,
+      return res.status(201).json({
+        success: true,
+        message: 'Order confirmed and delivery boy assigned',
+        order: newOrder,
+        deliveryBoy
       });
     }
 
-    const order = new Order({
-      user_id,
-      deliveryboy_id,
-      address_id,
-      prescription_id,
-      ETA,
-      medicines: enrichedMedicines,
-      total_amount: totalAmount,
+    return res.status(201).json({
+      success: true,
+      message: 'Order confirmed. No delivery boy available',
+      order: newOrder
     });
 
-    await order.save();
-    res.status(201).json(order);
-  } catch (e) {
-    console.error("Error creating order:", e);
-    res.status(500).json({ msg: "Internal server error", error: e });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 };
 
-const getOrder = async (req, res) => {
+exports.assignOrder = async (req, res) => {
   try {
-    const orderDetails = await Order.find()
-      .populate('user_id')
-      .populate('deliveryboy_id')
-     
-      .populate('prescription_id')
-      .populate('medicines.medicine_id'); // populate medicine details
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
-    res.status(200).json(orderDetails);
-  } catch (e) {
-    console.error("Error in getOrder:", e);
-    res.status(500).json({ msg: "Internal server error" });
+    if (order.deliveryboy_id) {
+      return res.status(400).json({ success: false, message: 'Delivery boy already assigned' });
+    }
+
+    const availableBoys = await DeliveryBoy.find({ isAvailable: 'yes' });
+
+    if (availableBoys.length === 0) {
+      return res.status(400).json({ success: false, message: 'No available delivery boys' });
+    }
+
+    const deliveryBoy = availableBoys[0];
+    order.deliveryboy_id = deliveryBoy._id;
+    await order.save();
+
+    deliveryBoy.isAvailable = 'no';
+    await deliveryBoy.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Delivery boy manually assigned.',
+      order,
+      deliveryBoy
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-  const getOrderById = async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      // Validate ObjectId
-      
-  
-      const orderDetails = await Order.findById(id)
-        .populate('user_id')
-        .populate('deliveryboy_id')
-         
-        .populate('prescription_id')
-        .populate({path:'medicines.medicine_id',
-          select: 'name quantity price _id'
-        }); // Populate nsted medicine info
-  
-      if (!orderDetails) {
-        return res.status(404).json({ msg: "Order not found" });
-      }
-  
-      res.status(200).json(orderDetails);
-    } catch (e) {
-      console.error("Error in getOrderById:", e);
-      res.status(500).json({ msg: "Internal server error", error: e.message });
-    }
+exports.getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('user_id')
+      .populate('address_id')
+      .populate('deliveryboy_id');
+
+    res.status(200).json({ success: true, orders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
+exports.getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate('user_id')
+      .populate('address_id')
+      .populate('deliveryboy_id');
 
-module.exports = { createOrder, getOrder,getOrderById };
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    res.status(200).json({ success: true, order });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const order = await Order.findById(req.params.id);
+
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    order.status = status;
+    await order.save();
+
+    if (status === 'delivered') {
+      await updateEarnings(order);
+    }
+
+    res.status(200).json({ success: true, order });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const updateEarnings = async (order) => {
+  try {
+    const deliveryBoy = await DeliveryBoy.findById(order.deliveryboy_id);
+    if (!deliveryBoy) return;
+
+    let earnings = await Earning.findOne({ delivery_agent_id: deliveryBoy._id });
+
+    if (!earnings) {
+      earnings = new Earning({
+        delivery_agent_id: deliveryBoy._id,
+        current_balance: order.total_amount,
+        total_earned: order.total_amount,
+        total_orders: 1,
+      });
+    } else {
+      earnings.current_balance += order.total_amount;
+      earnings.total_earned += order.total_amount;
+      earnings.total_orders += 1;
+    }
+
+    await earnings.save();
+
+    const assessment = new DeliveryAssessment({
+      order_id: order._id,
+      assignment_data_and_time: order.createdAt,
+      delivery_date_time: new Date(),
+      feedback: 'Delivered successfully',
+    });
+
+    await assessment.save();
+
+  } catch (err) {
+    console.error('Error updating earnings:', err.message);
+  }
+};
